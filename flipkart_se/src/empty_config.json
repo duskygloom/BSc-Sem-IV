@@ -1,0 +1,11 @@
+{
+	"root_username": "",
+	"root_password": "",
+	"screen_width": 100,
+	"result_per_page": 5,
+	"mysql_username": "",
+	"mysql_password": "",
+	"mysql_hostname": "",
+	"mysql_database": "",
+	"current_user": ""
+}

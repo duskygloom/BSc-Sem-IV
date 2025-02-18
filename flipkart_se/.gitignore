@@ -1,0 +1,29 @@
+# python venv
+Include/
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+bin/
+include/
+lib/
+lib64
+
+# vscode
+.vscode/
+
+# python
+__pycache__/
+test.*
+
+# drawio
+*.drawio.bkp
+
+# system specific scripts
+flipkart.bat
+flipkart
+
+# user specific
+src/database/history.sql
+src/config.json
+

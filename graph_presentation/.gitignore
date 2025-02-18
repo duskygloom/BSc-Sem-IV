@@ -1,0 +1,5 @@
+# windows hidden files
+~$*
+
+# drawio backups
+*.drawio.bkp

@@ -1,0 +1,125 @@
+import mariadb
+
+from mariadb import ProgrammingError
+from mariadb.cursors import Cursor
+from mariadb.connections import Connection
+
+from utils.config import *
+from utils.console import *
+
+
+class SQL:
+    cursor: Cursor
+    connection: Connection
+
+    history: str = "database/history.sql"
+
+    def __init__(self, username: str, password: str, hostname: str = "localhost", database: str = ""):
+        '''
+        Description
+        -----------
+        Connects to a database using username, password, hostname and database.
+
+        Returns
+        -------
+        Returns connection object if successfully connected, else returns None.
+        '''
+        try:
+            self.connection = mariadb.connect(
+                user=username,
+                password=password,
+                host=hostname,
+                database=database
+            )
+            self.cursor = self.connection.cursor()
+        except Exception as e:
+            console.print_error(f"Cannot connect to {database} database using {username}")
+            self.connection = self.cursor = None
+
+    def __del__(self):
+        '''
+        Description
+        -----------
+        Destructor of this class.
+        Closes SQL connection.
+        '''
+        if self.cursor:
+            self.cursor.close()
+            self.cursor = None
+        if self.connection:
+            self.connection.close()
+            self.connection = None
+    
+    def __bool__(self):
+        '''
+        Description
+        -----------
+        Determines whether the class is True or False.
+        Useful for using boolean operations.
+        '''
+        return self.connection != None
+
+    def execute(self, query: str, commit: bool = False) -> bool:
+        '''
+        Description
+        -----------
+        Executes query and also handles error.
+
+        Returns
+        -------
+        Returns True if successfully executed, else returns False.
+        '''
+        try:
+            self.cursor.execute(query)
+            with open(self.history, "a") as fp:
+                fp.write(query + ";\n")
+            if commit:
+                self.connection.commit()
+        except Exception as e:
+            console.print_error(e)
+            return False
+        return True
+    
+    def commit(self):
+        if not self.connection:
+            return
+        self.connection.commit()
+
+    def rollback(self):
+        if not self.connection:
+            return
+        self.connection.rollback()
+    
+    def fetchone(self) -> tuple:
+        '''
+        Returns
+        -------
+        Returns the first tuple fetched.
+        Returns None if nothing has been fetched.
+        '''
+        if not self.cursor:
+            return ()
+        try:
+            return self.cursor.fetchone() or ()
+        except ProgrammingError:
+            return ()
+    
+    def fetchmany(self, size: int = 1) -> list[tuple]:
+        if not self.cursor:
+            return []
+        return self.cursor.fetchmany(size)
+    
+    def fetchall(self) -> list[tuple]:
+        if not self.cursor:
+            return []
+        return self.cursor.fetchall()
+    
+    @staticmethod
+    def get_default() -> "SQL":
+        config = get_config()
+        return SQL(config['mysql_username'], config['mysql_password'], config['mysql_hostname'], config['mysql_database'])
+
+
+__all__ = [
+    "SQL"
+]
